@@ -1,0 +1,21 @@
+Data Ingest for US Census Dataset.
+
+1. Download the dataset here:
+    https://data.census.gov/cedsci/table?q=aff&tid=ACSDP1Y2018.DP05&hidePreview=true&tp=false&layer=VT_2018_050_00_PY_D1&g=0100000US_0400000US01.050000&moe=false
+
+2. Click the download button in the toolbar.
+
+3. See screenshot for selecting all 5-Year files.
+
+4. Transfer zip file to DUMBO. I used CyberDuck, but you can use scp.
+    scp productDownload_2020-07-08T155650.zip NETID@dumbo.hpc.nyu.edu:
+
+5. Unzip the file.
+    unzip productDownload_2020-07-08T155650.zip
+
+6. Remove unnecessary files
+    rm *_metadata_*.csv
+    rm *.txt
+
+7. Transfer csv files to HDFS
+    hdfs dfs -put *.csv /user/crb616/bdad_proj
