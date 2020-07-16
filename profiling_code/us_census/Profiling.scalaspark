@@ -1,13 +1,19 @@
 // Generate list of files
-val folder = "bdad_proj/"
 val files  = List.tabulate(9)(n => 2010 + n)
 
 var numRecords:Long = 0
 
 for (file <- files)
 {
-    var df_year = sc.textFile(folder + file + ".csv")
-
+    val folder = "bdad_proj/raw/"
+ 
+    // Read in csv file.
+    val df_year = spark.
+                   read.
+                   option("header", "true").
+                   csv(folder + file + ".csv")
+ 
+    //   val df_year = spark.read.parquet(folder + file + ".parquet")
     numRecords += df_year.count()
 }
 
@@ -16,16 +22,15 @@ println("Before Cleaning " + numRecords)
 var cleanedCount:Long = 0
 
 for (file <- files)
-{
-    for (idx <- 0 to 1)
-    {
-        var df_year = sc.textFile(folder + "cleaned/" + file + "/part-0000" + idx)
-
-        cleanedCount += df_year.count()
-    }
+{ 
+    val folder = "bdad_proj/clean/"
+    
+    // Read in csv file.
+    val df_year = spark.read.parquet(folder + file + ".parquet")    
+    cleanedCount += df_year.count()  
 }
 
 println("After Cleaning Count " + cleanedCount)
+println("Difference : " + (numRecords - cleanedCount))
 
-// Difference in the record count is 18 which is the two headers that were dropped for each year during cleaning.
-// There are 9 years in total so this is expected.
+// NOTE: Difference in number of records is from dropping the extra headers for each year.
