@@ -1,0 +1,120 @@
+import org.apache.spark.sql.types._
+
+// Generate list of files
+val folder = "bdad_proj/raw/"
+
+// All the files are years. EX: "2010.csv"
+val files  = List.tabulate(9)(n => 2010 + n)
+
+for (file <- files)
+{
+    // Read in csv file.
+    var df_year = spark.
+                   read.
+                   option("header", "true").
+                   csv(folder + file + ".csv")
+
+    // Select the columns to keep
+    if (file == 2017 || file == 2018 )
+    {
+        // Move the state and county columns up.
+        df_year = df_year.select("GEO_ID",
+                                "NAME",
+                                "DP05_0001E",
+                                "DP05_0002E",
+                                "DP05_0003E",
+                                "DP05_0071PE",   // TODO:  DP05_0071PE for 2017 and 2018
+                                "DP05_0077PE",   // DP05_0077PE
+                                "DP05_0078PE",   // DP05_0078PE
+                                "DP05_0079PE")   // DP05_0079PE
+    }
+    else
+    {
+        // Move the state and county columns up.
+        df_year = df_year.select("GEO_ID",
+                                 "NAME",
+                                "DP05_0001E",
+                                "DP05_0002E",
+                                "DP05_0003E",
+                                "DP05_0070PE",   // TODO:  DP05_0071PE for 2017 and 2018
+                                "DP05_0072PE",   // DP05_0077PE
+                                "DP05_0073PE",   // DP05_0078PE
+                                "DP05_0074PE")   // DP05_0079PE
+    }
+
+    // Split NAME into county and state columns. Drop the old column.
+    df_year = df_year.withColumn("state",  split(col("NAME"), ",").getItem(1)).
+                      withColumn("county", split(col("NAME"), ",").getItem(0)).
+                      drop("name")
+
+    if (file == 2017 || file == 2018 )
+    {
+        // Move the state and county columns up.
+        df_year = df_year.select("GEO_ID",
+                                "county",
+                                "state",
+                                "DP05_0001E",
+                                "DP05_0002E",
+                                "DP05_0003E",
+                                "DP05_0071PE",   // TODO:  DP05_0071PE for 2017 and 2018
+                                "DP05_0077PE",   // DP05_0077PE
+                                "DP05_0078PE",   // DP05_0078PE
+                                "DP05_0079PE")   // DP05_0079PE
+    }
+    else
+    {
+        // Move the state and county columns up.
+        df_year = df_year.select("GEO_ID",
+                                "county",
+                                "state",
+                                "DP05_0001E",
+                                "DP05_0002E",
+                                "DP05_0003E",
+                                "DP05_0070PE",   // TODO:  DP05_0071PE for 2017 and 2018
+                                "DP05_0072PE",   // DP05_0077PE
+                                "DP05_0073PE",   // DP05_0078PE
+                                "DP05_0074PE")   // DP05_0079PE
+    }
+
+    // Change the header names.
+    val column_names = Seq("county_id",
+                           "county",
+                           "state",
+                           "total_population",
+                           "men",
+                           "women",
+                           "hispanic",
+                           "white",
+                           "black",
+                           "native")
+
+    df_year = df_year.toDF(column_names:_*)
+
+    // Remove the first row which is the old second header.
+    val firstRow = df_year.first
+    df_year = df_year.filter(x => x != firstRow)
+
+    // Reformat first column to only have the county ID.
+    df_year = df_year.withColumn("county_id", split(col("county_id"), "US").getItem(1))
+
+    // Check for empty values. None were found.
+    df_year.select(df_year.columns.map(count => sum(col(count).isNull.cast("int")).alias(count)): _*).show
+
+    df_year = df_year.withColumn("year", lit(file.toString))
+
+    val df2 = df_year.withColumn("year",             col("year").cast(IntegerType)).
+                      withColumn("county_id",        col("county_id").cast(IntegerType)).
+                      withColumn("county",           col("county").cast(StringType)).
+                      withColumn("state",            col("state").cast(StringType)).
+                      withColumn("total_population", col("total_population").cast(LongType)).
+                      withColumn("men",              col("men").cast(LongType)).
+                      withColumn("women",            col("women").cast(LongType)).
+                      withColumn("hispanic",         col("hispanic").cast(DoubleType)).
+                      withColumn("white",            col("white").cast(DoubleType)).
+                      withColumn("black",            col("black").cast(DoubleType)).
+                      withColumn("native",           col("native").cast(DoubleType))
+    
+    val dir = "bdad_proj/clean/"
+    
+    df2.write.parquet(dir + file.toString + ".parquet")
+}

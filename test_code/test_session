@@ -1,0 +1,100 @@
+val test = sc.textFile("BDAD/Proj/CBP/cbp11co.txt")
+test.take(10)
+sc.parallelize(test.take(10)).collect()
+test.take(10).foreach(println)
+val test = spark.read.csv("BDAD/Proj/CBP/cbp11co.txt")
+test
+test.take(10).foreach(println)
+test.show()
+import org.apache.spark.sql.Encoders;
+val test = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("BDAD/Proj/CBP/cbp11co.txt")
+test.show()
+test.explain
+test.columns
+test.schema
+test.printSchema
+test
+val colsToRemove = List("empflag","emp_nf","emp","qp1_nf","qp1","ap_nf","ap")
+test.drop(colsToRemove:_*)
+test.show()
+val test2 = test.drop(colsToRemove:_*)
+test2
+test2.show()
+test2.take(1)
+test2.take(1)(0)
+test2.take(1)(0)(2)
+test2.printSchema
+test2.take(1)
+test2.take(1)(0)
+val testRow = test2.take(1)(0)
+testRow(2)
+testRow.schema
+testRow.get(0)
+testRow.getString(2)
+testRow.getInt(0)
+val test3 = test2.filter(_.getString(2).contains("-"))
+test2.count()
+test3.count
+test3.show()
+test3.show(22)
+test3.show(21)
+val test4 = test3.filter(_.getInt(0) == 6).filter(_.getInt(1) == 9)
+test4.show()
+test4.show(100)
+val test5 = test4.withColumn("combined", array($"naics", $"est"))
+test5.show()
+val test5 = test4.withColumn("combined", array($"naics",$"est",$"n1_4",$"n5_9",$"n10_19",$"n20_49",$"n50_99",$"n100_249",$"n250_499",$"n500_999",$"n1000",$"n1000_1",$"n1000_2",$"n1000_3",$"n1000_4"))
+test5.show()
+val noMoreCols = List("naics","est","n1_4","n5_9","n10_19","n20_49","n50_99","n100_249","n250_499","n500_999","n1000","n1000_1","n1000_2","n1000_3","n1000_4")
+val test5 = test4.withColumn("combined", array($"naics",$"est",$"n1_4",$"n5_9",$"n10_19",$"n20_49",$"n50_99",$"n100_249",$"n250_499",$"n500_999",$"n1000",$"n1000_1",$"n1000_2",$"n1000_3",$"n1000_4")).drop(noMoreCols:_*)
+test5.show()
+test5.show(22)
+val test6 = test5.withColumn("location", array($"fipstate", $"fipscty", $"censtate", $"cencty")).drop(List("fipstate", "fipscty", "censtate", "cencty"):_*)
+test6.show()
+test6.groupBy("location")
+test6.groupBy("location").toString
+test6.show()
+test6.take(1)(0)
+test6.take(1)(0)(0)
+List(test6.take(1)(0)(0))
+List(test6.take(1)(0)(0)):::List(1,2,3)
+List(test6.take(1)(0)(0)):::List((1,2,3))
+res61(1)
+res61(0)
+test6.toDF.show()
+test6.toDF.reduce((row1, row2) => row1)
+test5.show()
+val test6 = test5.withColumn("location", $"fipstate" + "|" + $"fipscty" + "|" + $"censtate" + "|" + $"cencty")
+test6.show(22)
+val test6 = test5.withColumn("location", concat(col("fipstate"), lit("|"), col("fipscty"), lit("|"), col("censtate"), lit("|"), col("cencty")))
+test6.show(22)
+val test6 = test5.withColumn("location", concat(col("fipstate"), lit("|"), col("fipscty"), lit("|"), col("censtate"), lit("|"), col("cencty"))).drop(List("fipstate", "fipscty", "censtate", "cencty"):_*)
+test6.show(22)
+test5.show(22)
+test5.groupBy("fipstate", "fipscty", "censtate", "cencty")
+test5.groupBy("fipstate", "fipscty", "censtate", "cencty").toString
+test5
+test5.show
+import org.apache.spark.sql.functions.udf
+test5.toJavaRDD
+test4.show()
+test4.show(22)
+val test5 = test4.withColumn("NAICS_VECTOR", array($"naics", $"est",$"n1_4",$"n5_9",$"n10_19",$"n20_49",$"n50_99",$"n100_249",$"n250_499",$"n500_999",$"n1000",$"n1000_1",$"n1000_2",$"n1000_3",$"n1000_4"))
+val test5 = test4.withColumn("NAICS_VECTOR", array($"naics", $"est",$"n1_4",$"n5_9",$"n10_19",$"n20_49",$"n50_99",$"n100_249",$"n250_499",$"n500_999",$"n1000",$"n1000_1",$"n1000_2",$"n1000_3",$"n1000_4")).show(22)
+val test5 = test4.withColumn("NAICS_VECTOR", array($"naics", $"est",$"n1_4",$"n5_9",$"n10_19",$"n20_49",$"n50_99",$"n100_249",$"n250_499",$"n500_999",$"n1000",$"n1000_1",$"n1000_2",$"n1000_3",$"n1000_4")).drop("naics","est","n1_4","n5_9","n10_19","n20_49","n50_99","n100_249","n250_499","n500_999","n1000","n1000_1","n1000_2","n1000_3","n1000_4")
+test5.show(22)
+val test5 = test4.withColumn("NAICS_VECTOR", array($"est",$"n1_4",$"n5_9",$"n10_19",$"n20_49",$"n50_99",$"n100_249",$"n250_499",$"n500_999",$"n1000",$"n1000_1",$"n1000_2",$"n1000_3",$"n1000_4")).drop("est","n1_4","n5_9","n10_19","n20_49","n50_99","n100_249","n250_499","n500_999","n1000","n1000_1","n1000_2","n1000_3","n1000_4")
+test5.show
+test5
+test5.groupBy("fipstate", "fipscty", "censtate", "cencty")
+import org.apache.spark.sql.functions._
+test5.groupBy("fipstate", "fipscty", "censtate", "cencty").agg(
+collect_list($"naics"),
+collect_list($"NAICS_VECTOR"))
+res95.show
+val test6 = test5.groupBy("fipstate", "fipscty", "censtate", "cencty").agg(
+collect_list($"naics"),
+collect_list($"NAICS_VECTOR"))
+test6.show
+test6.take(1)(0)(5)
+test6.take(1)(0)(4)

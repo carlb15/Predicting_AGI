@@ -1,0 +1,7 @@
+val cbp = spark.read.parquet("SHARE/DF/cbp.parquet").select($"fips_combined".cast("Int"), $"year".cast("Int"), $"nPres", $"totals", $"ests")
+val irs = spark.read.parquet("SHARE/DF/irs_new.parquet").select($"fips_combined".cast("Int"), $"year".cast("Int"), $"number_of_returns", $"total_agi")
+val dem = spark.read.parquet("SHARE/DF/demographics.parquet").select($"county_id".cast("Int").as("fips_combined"), $"year".cast("Int"), $"county", $"state", $"total_population".cast("Int"), $"men".cast("Int"), $"women".cast("Int"), $"hispanic".cast("Double"), $"white".cast("Double"), $"black".cast("Double"), $"native".cast("Double")).na.drop
+val edu = spark.read.parquet("SHARE/DF/edu.parquet")
+val joinCols = Seq("fips_combined", "year")
+val combined = cbp.join(irs, joinCols, "inner").join(dem, joinCols, "inner").join(edu, joinCols, "inner")
+val comb_avg_agi = combined.withColumn("avg_agi_by_pop", $"total_agi" / $"total_population").withColumn("avg_agi_by_returns", $"total_agi" / $"number_of_returns")

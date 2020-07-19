@@ -1,0 +1,7 @@
+[0m[[0m[31merror[0m] [0m[0m/home/mlu216/BDAD/Proj/ModelTrainer3/src/main/scala/ModelTrainer.scala:79:27: not found: value expr[0m
+[0m[[0m[31merror[0m] [0m[0m			.withColumn("feature", expr("_2._1"))[0m
+[0m[[0m[31merror[0m] [0m[0m			                       ^[0m
+[0m[[0m[31merror[0m] [0m[0m/home/mlu216/BDAD/Proj/ModelTrainer3/src/main/scala/ModelTrainer.scala:80:25: not found: value expr[0m
+[0m[[0m[31merror[0m] [0m[0m			.withColumn("index", expr("_2._2"))[0m
+[0m[[0m[31merror[0m] [0m[0m			                     ^[0m
+[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m

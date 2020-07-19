@@ -1,0 +1,39 @@
+val allyears = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("BDAD/Proj/CBP/")
+val colsToRemove = List("empflag","emp_nf","emp","qp1_nf","qp1","ap_nf","ap","n1000", "censtate", "cencty")
+val allyears2 = allyears.drop(colsToRemove:_*)
+val allyears3 = allyears2.filter(_.getString(2).contains("-"))
+import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.functions.input_file_name
+val allyears4 = allyears3.withColumn("filename", input_file_name)
+val extractYear = udf((filename: String) => "20" + filename.split("/").last.substring(3,5))
+val allyears5 = allyears4.withColumn("year", extractYear($"filename")).drop("filename")
+val cleaned_data = allyears5.select(
+	$"fipstate",
+	$"fipscty",
+	$"naics",
+	$"est".cast("int"),
+	$"n1_4".cast("int"),
+	$"n5_9".cast("int"),
+	$"n10_19".cast("int"),
+	$"n20_49".cast("int"),
+	$"n50_99".cast("int"),
+	$"n100_249".cast("int"),
+	$"n250_499".cast("int"),
+	$"n500_999".cast("int"),
+	$"n1000_1".cast("int"),
+	$"n1000_2".cast("int"),
+	$"n1000_3".cast("int"),
+	$"n1000_4".cast("int"),
+	$"year".cast("int")).na.fill(0)
+val listOfNAICS = cleaned_data.select("naics").distinct.rdd.map(_(0).toString).collect.sorted.toList
+//cleaned_data.cache
+:load BusinessProfile.scala
+import spark.implicits._
+implicit val BusinessProfileEncoder = org.apache.spark.sql.Encoders.kryo[BusinessProfile]
+val mega = cleaned_data.map(r => BusinessProfileFactory(r, listOfNAICS))
+val mega2 = mega.groupByKey(bp => (bp.fipstate, bp.fipscty, bp.year))
+val final_data = mega2.reduceGroups(_.merge(_))
+//final_data.cache
+val final_data_DF = final_data.map(r => (r._2.fipstate, r._2.fipscty, r._2.year, r._2.nPres, r._2.totals, r._2.ests)).withColumnRenamed("_1", "fipstate").withColumnRenamed("_2", "fipscty").withColumnRenamed("_3", "year").withColumnRenamed("_4", "nPres").withColumnRenamed("_5", "totals").withColumnRenamed("_6", "ests")
+//final_data_DF.cache
+val final_data_combined_DF = final_data_DF.withColumn("fips_combined", concat($"fipstate", $"fipscty"))

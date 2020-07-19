@@ -1,0 +1,36 @@
+// Generate list of files
+val files  = List.tabulate(9)(n => 2010 + n)
+
+var numRecords:Long = 0
+
+for (file <- files)
+{
+    val folder = "bdad_proj/raw/"
+ 
+    // Read in csv file.
+    val df_year = spark.
+                   read.
+                   option("header", "true").
+                   csv(folder + file + ".csv")
+ 
+    //   val df_year = spark.read.parquet(folder + file + ".parquet")
+    numRecords += df_year.count()
+}
+
+println("Before Cleaning " + numRecords)
+
+var cleanedCount:Long = 0
+
+for (file <- files)
+{ 
+    val folder = "bdad_proj/clean/"
+    
+    // Read in csv file.
+    val df_year = spark.read.parquet(folder + file + ".parquet")    
+    cleanedCount += df_year.count()  
+}
+
+println("After Cleaning Count " + cleanedCount)
+println("Difference : " + (numRecords - cleanedCount))
+
+// NOTE: Difference in number of records is from dropping the extra headers for each year.

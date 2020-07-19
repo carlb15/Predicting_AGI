@@ -1,0 +1,7 @@
+test._2.fipstate
+test._2.fipscty
+test._2.year
+test._2.nPres
+test._2.totals
+test._2.ests.foreach(a => println(a.toList))
+

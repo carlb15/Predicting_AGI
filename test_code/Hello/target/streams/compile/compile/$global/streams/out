@@ -1,0 +1,5 @@
+[0m[[0m[31merror[0m] [0m[0m/home/mlu216/BDAD/Proj/Hello/src/main/scala/SimpleApp.scala:7:49: value toDF is not a member of org.apache.spark.rdd.RDD[Int][0m
+[0m[[0m[31merror[0m] [0m[0mError occurred in an application involving default arguments.[0m
+[0m[[0m[31merror[0m] [0m[0m    val df = spark.sparkContext.parallelize(ar).toDF[0m
+[0m[[0m[31merror[0m] [0m[0m                                                ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m
