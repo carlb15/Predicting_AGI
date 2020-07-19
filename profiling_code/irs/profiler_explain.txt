@@ -1,0 +1,1 @@
+This spark job should be run by copy and pasting the commands into a spark shell.  The directories will have to be updated.  When run, the output is basic statistics for the IRS tax dataset.
