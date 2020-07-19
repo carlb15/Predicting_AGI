@@ -1,0 +1,62 @@
+val test = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("BDAD/Proj/CBP/cbp11co.txt")
+test.show(21)
+val colsToRemove = List("empflag","emp_nf","emp","qp1_nf","qp1","ap_nf","ap")
+val test2 = test.drop(colsToRemove:_*)
+test2.show(21)
+val test3 = test2.filter(_.getString(2).contains("-"))
+test3.show(21)
+test3.select("naics")
+test3.select("naics").show(21)
+test3.select("naics").distinct
+test3.select("naics").distinct.show
+test3.select("naics").distinct.count
+test3.select("naics").distinct.show(21)
+val bigtest = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("BDAD/Proj/CBP/")
+bigtest.printSchema
+val bigtest2 = bigtest.drop(colsToRemove:_*)
+val bigtest3 = bigtest2.filter(_.getString(2).contains("-"))
+bigtest3.count
+test3.count
+test3.select("naics").distinct.count
+bigtest3.select("naics").distinct.count
+test3.select("naics").distinct.show(21)
+bigtest3.select("naics").distinct.show(21)
+bigtest3.select("fipstate", "fipscty")
+bigtest3.select("fipstate", "fipscty").show(21)
+val bigtest4 = bigtest3.select("fipstate","fipscty","naics","est","n1_4","n5_9","n10_19","n20_49","n50_99","n100_249","n250_499","n500_999","n1000","n1000_1","n1000_2","n1000_3","n1000_4")
+bigtest4.show(21)
+bigtest4.count
+val bigtest5 = bigtest4.drop(List("n1000_1", "n1000_2", "n1000_3", "n1000_4"):_*)
+bigtest5.count
+bigtest5.show(21)
+val bigtest5 = bigtest4.drop("n1000")
+bigtest5.show(21)
+bigtest5.select("n1000_1").distinct
+bigtest5.select("n1000_1").distinct.show
+bigtest5.select("n1000_1").distinct.count
+bigtest5.select("n1000_2").distinct.count
+bigtest5.select("n1000_3").distinct.count
+bigtest5.select("n1000_4").distinct.count
+bigtest5.distinct.count
+bigtest5.count
+import org.apache.spark.sql.functions._
+val bigtest6 = bigtest5.withColumn("filename", input_file_name)
+bigtest6.show(21)
+bigtest6.select("filename").take(1)(0)
+bigtest6.select("filename").take(1)(0).getString(0)split("/")
+bigtest6.select("filename").take(1)(0).getString(0).split("/")
+bigtest6.select("filename").take(1)(0).getString(0).split("/").last
+val numPattern = "[0-9]+".r
+bigtest6.select("filename").take(1)(0).getString(0).split("/").last.substring(3,5)
+bigtest6.select("filename").take(10)(1).getString(0).split("/").last.substring(3,5)
+bigtest6.select("filename").take(10)(9).getString(0).split("/").last.substring(3,5)
+val bigtest7 = bigtest6.withColumn("year", $"filename")
+bigtest7.show(21)
+val bigtest7 = bigtest6.withColumn("year", $"filename")
+bigtest7.show(21)
+val extractYear = udf((filename: String) => "20" + filename.split("/").last.substring(3,5))
+extractYear
+val bigtest7 = bigtest6.withColumn("year", extractYear($"filename"))
+bigtest7.show(21)
+bigtest7.select("year").distinct
+bigtest7.select("year").distinct.show

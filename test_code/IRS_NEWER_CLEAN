@@ -1,0 +1,101 @@
+val irsRaw = spark.read.option("header", "true").csv("SHARE/IRS/RAW/")
+import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.functions.input_file_name
+def extractYear = udf((filename: String) => "20" + filename.split("/").last.substring(0,2))
+val irsLess = irsRaw.select($"STATEFIPS".cast("Int"), $"STATE", $"COUNTYFIPS".cast("Int"), $"COUNTYNAME", $"agi_stub".cast("Int"), $"N1".cast("Int"), $"mars1".cast("Int"), $"MARS2".cast("Int"), $"MARS4".cast("Int"), $"A00100".cast("Int")).na.drop.withColumn("year", extractYear(input_file_name))
+irsLess.show
+val irsNoTotals = irsLess.filter($"COUNTYFIPS" =!= 0)
+def makeCountyID = udf((statefips:Int, countyfips:Int) => f"$statefips%02d$countyfips%03d")
+val irsWithCombinedID = irsNoTotals.withColumn("county_id", makeCountyID($"STATEFIPS", $"COUNTYFIPS"))
+:load IrsProfile.scala
+import spark.implicits._
+implicit val IrsProfileEncoder = org.apache.spark.sql.Encoders.kryo[IrsProfile]
+irsWithCombinedID.map(r => IrsProfileFactory(r)).show
+irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_))
+res2.show
+val irsFinal = irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_)).map(r => (r._2.fipstate, r._2.state, r._2.fipscty, r._2.county))
+irsFinal.show
+val irsFinal = irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_)).map(r => (r._2.fipstate, r._2.state, r._2.fipscty, r._2.county, r._2.county_id))
+irsFinal.show
+irsWithCombinedID.show
+val irsFinal = irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_)).map(r => (r._2.fipstate, r._2.state, r._2.fipscty, r._2.county, r._2.county_id, r._2.n1, r._2.mars1, r._2.mars2, r._2.mars4, r._2.agi, r._2.year))
+irsFinal.show
+val irsFinal = irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_)).map(r => (r._2.fipstate, r._2.state, r._2.fipscty, r._2.county, r._2.county_id, r._2.n1, r._2.mars1, r._2.mars2, r._2.mars4, r._2.agi, r._2.year))
+irsFinal.show
+irsFinal.count
+val cbp = spark.read.parquet("SHARE/DF/cbp.parquet")
+cbp.count
+val initialColNames = Seq("_1", "_2", "_3", "_4", "_5", "_6", "_7", "_8", "_9", "_10", "_11")
+val initialColNames = Seq("_1")
+val _1 = "statefips"
+val renamedColumns = initialColNames.map(name => col(name).as(s"$name"))
+irsFinal.select(renamedColumns : _*)
+irsFinal.select(renamedColumns : _*).show
+val renamedColumns = ("_1" -> "statefips")
+val initialColNames = Seq("_1", "_2", "_3", "_4", "_5", "_6", "_7", "_8", "_9", "_10", "_11")
+val newColNames = ("_1" -> "statefips", "_2" -> "state", "_3" -> "countyfips", "_4" -> "county", "_5" -> "county_id", "_6" -> "n1", "_7" -> "mars1", "_8" -> "mars2", "_9" -> "mars4", "_10" -> "agi", "_11" -> "year")
+val newColNames = Map("_1" -> "statefips", "_2" -> "state", "_3" -> "countyfips", "_4" -> "county", "_5" -> "county_id", "_6" -> "n1", "_7" -> "mars1", "_8" -> "mars2", "_9" -> "mars4", "_10" -> "agi", "_11" -> "year")
+newColNames("_1")
+val irsFinal = irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_)).map(r => (r._2.fipstate, r._2.state, r._2.fipscty, r._2.county, r._2.county_id, r._2.n1, r._2.mars1, r._2.mars2, r._2.mars4, r._2.agi, r._2.year)).withColumnRenamed("_1", "fipstate").withColumnRenamed("_2", "state").withColumnRenamed("_3", "fipscty").withColumnRenamed("_4", "county").withColumnRenamed("_5", "state_county").withColumnRenamed("_6", "n1").withColumnRenamed("_7", "mars1").withColumnRenamed("_8", "mars2").withColumnRenamed("_9", "mars4").withColumnRenamed("_10", "agi").withColumnRenamed("_11", "year")
+irsFinal.show
+irsWithCombinedID
+irsWithCombinedID.show
+irsFinal.printSchema
+irsFinal.na.drop.count
+irsFinal.count
+cbp.count
+irsFinal.write.parquet("SHARE/DF/irs_new.parquet")
+val t = spark.read.parquet("SHARE/DF/irs_new.parquet")
+t.show
+t.orderBy("year", "fipstate", "fipscty")
+t.orderBy("year", "fipstate", "fipscty").show
+val t_old = spark.read.parquet("SHARE/DF/county_irs.parquet")
+t.filter($"fipstate" === 1 && $"fipscty" === 1 && $"year" === 2011).show
+t_old.show
+t_old.printSchema
+t_old.filter($"STATE" === "AL" && $"COUNTYNAME" === "Autauga County" && $"year" === "2011")
+t_old.filter($"STATE" === "AL" && $"COUNTYNAME" === "Autauga County" && $"year" === "2011").show
+irsRaw
+irsRaw.show
+irsLess.show
+irsLess.filter($"STATEFIPS" === 1 && $"COUNTYFIPS" === 1 && $"year" === 2011).show
+irsLess.filter($"STATEFIPS" === 1 && $"COUNTYFIPS" === 1 && ($"year" === 2011 || $"year" === 2017)).show
+t.filter($"fipstate" === 1 && $"fipscty" === 1 && ($"year" === 2011 || $"year" === 2017)).show
+val irsRaw11 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/11incyallagi.csv")
+val irsRaw12 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/12cyallagi.csv")
+val irsRaw11 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/11incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw12 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/12cyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw13 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/13incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw14 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/14incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw15 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/15incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw16 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/16incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw17 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/17incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val toAdd = Array(irsRaw12, irsRaw13, irsRaw14, irsRaw15, irsRaw16, irsRaw17)
+var irsRaw = irsRaw11
+for (irs <- toAdd) { irsRaw = irsRaw.union(irs) }
+irsRaw.count
+irsRaw11.count
+irsRaw11.count + irsRaw12.count + irsRaw13.count + irsRaw14.count + irsRaw15.count + irsRaw16.count + irsRaw17.count
+irsRaw.show
+import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.functions.input_file_name
+def extractYear = udf((filename: String) => "20" + filename.split("/").last.substring(0,2))
+val irsLess = irsRaw.select($"STATEFIPS".cast("Int"), $"STATE", $"COUNTYFIPS".cast("Int"), $"COUNTYNAME", $"agi_stub".cast("Int"), $"N1".cast("Int"), $"A00100".cast("Int")).na.drop.withColumn("year", extractYear(input_file_name))
+irsLess.count
+irsRaw.count
+val irsNoTotals = irsLess.filter($"COUNTYFIPS" =!= 0)
+def makeCountyID = udf((statefips:Int, countyfips:Int) => f"$statefips%02d$countyfips%03d")
+val irsWithCombinedID = irsNoTotals.withColumn("county_id", makeCountyID($"STATEFIPS", $"COUNTYFIPS"))
+:load IrsProfile.scala
+import spark.implicits._
+implicit val IrsProfileEncoder = org.apache.spark.sql.Encoders.kryo[IrsProfile]
+val irsFinal = irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_)).map(r => (r._2.fipstate, r._2.state, r._2.fipscty, r._2.county, r._2.county_id, r._2.n1, r._2.mars1, r._2.mars2, r._2.mars4, r._2.agi, r._2.year)).withColumnRenamed("_1", "fipstate").withColumnRenamed("_2", "state").withColumnRenamed("_3", "fipscty").withColumnRenamed("_4", "county").withColumnRenamed("_5", "state_county").withColumnRenamed("_6", "n1").withColumnRenamed("_7", "mars1").withColumnRenamed("_8", "mars2").withColumnRenamed("_9", "mars4").withColumnRenamed("_10", "agi").withColumnRenamed("_11", "year")
+import spark.implicits._
+val irsFinal = irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_)).map(r => (r._2.fipstate, r._2.state, r._2.fipscty, r._2.county, r._2.county_id, r._2.n1, r._2.mars1, r._2.mars2, r._2.mars4, r._2.agi, r._2.year)).withColumnRenamed("_1", "fipstate").withColumnRenamed("_2", "state").withColumnRenamed("_3", "fipscty").withColumnRenamed("_4", "county").withColumnRenamed("_5", "state_county").withColumnRenamed("_6", "n1").withColumnRenamed("_7", "mars1").withColumnRenamed("_8", "mars2").withColumnRenamed("_9", "mars4").withColumnRenamed("_10", "agi").withColumnRenamed("_11", "year")
+irsRaw
+irsRaw.show
+:load IrsProfile.scala
+:load IrsProfile.scala
+import spark.implicits._
+implicit val IrsProfileEncoder = org.apache.spark.sql.Encoders.kryo[IrsProfile]
+val irsFinal = irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_)).map(r => (r._2.fipstate, r._2.state, r._2.fipscty, r._2.county, r._2.county_id, r._2.n1, r._2.agi, r._2.year)).withColumnRenamed("_1", "fipstate").withColumnRenamed("_2", "state").withColumnRenamed("_3", "fipscty").withColumnRenamed("_4", "county").withColumnRenamed("_5", "state_county").withColumnRenamed("_6", "n1").withColumnRenamed("_10", "agi").withColumnRenamed("_11", "year")

@@ -1,0 +1,49 @@
+val cbp = spark.read.parquet("SHARE/DF/cbp.parquet")
+cbp.show
+val cbp = spark.read.parquet("SHARE/DF/cbp.parquet").select($"fips_combined".cast("Int"), $"year".cast("Int"), $"nPres", $"totals", $"ests")
+cbp.show
+val irs = spark.read.parquet("SHARE/DF/irs_new.parquet")
+irs.show
+irs.printSchema
+val irs = spark.read.parquet("SHARE/DF/irs_new.parquet").select($"fips_combined".cast("Int"), $"year".cast("Int"), $"number_of_returns", $"total_agi")
+irs.show
+cbp.show
+val dem = spark.read.parquet("SHARE/DF/demographics.parquet")
+dem.printSchema
+val dem = spark.read.parquet("SHARE/DF/demographics.parquet").select($"county_id".cast("Int").as("fips_combined"), $"year".cast("Int"), $"county", $"state", $"total_population".cast("Int"), $"men".cast("Int"), $"women".cast("Int"), $"hispanic".cast("Int"), $"white".cast("Int"), $"black".cast("Int"), $"native".cast("Int"))
+dem.show
+dem.count
+dem.na.drop.count
+dem.filter($"fips_combined" === null).count
+dem.filter($"fips_combined" === "null").count
+dem.filter($"state" === "state").count
+val dem = spark.read.parquet("SHARE/DF/demographics.parquet").select($"county_id".cast("Int").as("fips_combined"), $"year".cast("Int"), $"county", $"state", $"total_population".cast("Int"), $"men".cast("Int"), $"women".cast("Int"), $"hispanic".cast("Int"), $"white".cast("Int"), $"black".cast("Int"), $"native".cast("Int")).na.drop
+cbp.count
+cbp.na.drop.count
+irs.na.drop.count
+irs.count
+cbp.printSchema
+irs.printSchema
+dem.printSchema
+val dem = spark.read.parquet("SHARE/DF/demographics.parquet").select($"county_id".cast("Int").as("fips_combined"), $"year".cast("Int"), $"county", $"state", $"total_population".cast("Int"), $"men".cast("Int"), $"women".cast("Int"), $"hispanic".cast("Double"), $"white".cast("Double"), $"black".cast("Double"), $"native".cast("Double")).na.drop
+dem.show
+cbp.printSchema
+irs.printSchema
+dem.printSchema
+cbp.count
+irs.count
+dem.count
+val joinCols = Seq("fips_combined", "year")
+val combined = cbp.join(irs, joinCols, "inner").join(dem, joinCols, "inner")
+combined.show
+val comb_avg_agi = combined.withColumn("avg_agi_by_pop", $"total_agi" / $"total_population")
+comb_avg_agi.show
+val comb_avg_agi = combined.withColumn("avg_agi_by_pop", $"total_agi" / $"total_population").withColumn("avg_agi_by_returns", $"total_agi" / $"total_population")
+comb_avg_agi.show
+val comb_avg_agi = combined.withColumn("avg_agi_by_pop", $"total_agi" / $"total_population").withColumn("avg_agi_by_returns", $"total_agi" / $"total_population").withColumn("avg_diff", $"avg_agi_by_pop" / $"avg_agi_by_returns")
+comb_avg_agi.select($"avg_diff").describe().show
+val comb_avg_agi = combined.withColumn("avg_agi_by_pop", $"total_agi" / $"total_population").withColumn("avg_agi_by_returns", $"total_agi" / $"number_of_returns").withColumn("avg_diff", $"avg_agi_by_pop" / $"avg_agi_by_returns")
+comb_avg_agi.select($"avg_diff").describe().show
+comb_avg_agi.filter($"avg_diff" < .2).show
+combined.cache
+val comb_avg_agi = combined.withColumn("avg_agi_by_pop", $"total_agi" / $"total_population").withColumn("avg_agi_by_returns", $"total_agi" / $"number_of_returns")

@@ -1,0 +1,4 @@
+[0m[[0m[31merror[0m] [0m[0m/home/mlu216/BDAD/Proj/ModelTrainer2/src/main/scala/ModelTrainer.scala:95:50: not found: value agi[0m
+[0m[[0m[31merror[0m] [0m[0m                (fips_combined, new LabeledPoint(agi, Vectors.dense(demo ++ est)))[0m
+[0m[[0m[31merror[0m] [0m[0m                                                 ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m

@@ -1,0 +1,27 @@
+[0m[[0m[0minfo[0m] [0m[0mPackaging /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/modeltrainer_2.11-0.1.0-SNAPSHOT.jar ...[0m
+[0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$typecreator5$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$typecreator5$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$anonfun$3$$anonfun$apply$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$anonfun$3$$anonfun$apply$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$anonfun$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$anonfun$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$typecreator13$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$typecreator13$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$anonfun$2.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$anonfun$2.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$anonfun$main$1$$anonfun$apply$2.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$anonfun$main$1$$anonfun$apply$2.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$anonfun$3.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$anonfun$3.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$anonfun$main$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$anonfun$main$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$typecreator4$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$typecreator4$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	ModelTrainer$$anonfun$MakeLabeledPoint$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/mlu216/BDAD/Proj/ModelTrainer/target/scala-2.11/classes/ModelTrainer$$anonfun$MakeLabeledPoint$1.class[0m
+[0m[[0m[0minfo[0m] [0m[0mDone packaging.[0m

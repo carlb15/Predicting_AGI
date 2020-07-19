@@ -1,0 +1,56 @@
+val irsRaw = spark.read.option("header", "true").csv("SHARE/IRS/RAW/")
+irsRaw.show
+irsRaw.show
+irsRaw.filter($"agi_stub" === 0).count
+irsRaw.filter($"agi_stub" === 1).count
+irsRaw.count
+val irsLess = irsRaw.select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "mars1", "MARS2", "MARS4", "A00100")
+val irsLess = irsRaw.select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "mars1", "MARS2", "MARS4", "A00100").show
+val irsLess = irsRaw.select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "mars1", "MARS2", "MARS4", "A00100")
+irsLess.select("STATEFIPS").orderBy("STATEFIPS").distinct.show
+import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.functions.input_file_name
+irsLess.filter($"COUNTYFIPS" === "000").count
+val irsLess = irsRaw.select($"STATEFIPS".cast("Int"), $"STATE", $"COUNTYFIPS".cast("Int"), $"COUNTYNAME", $"agi_stub".cast("Int"), $"N1", $"mars1", $"MARS2", $"MARS4", $"A00100")
+irsLess.show
+val irsLess = irsRaw.select($"STATEFIPS".cast("Int"), $"STATE", $"COUNTYFIPS".cast("Int"), $"COUNTYNAME", $"agi_stub".cast("Int"), $"N1".cast("Int"), $"mars1".cast("Int"), $"MARS2".cast("Int"), $"MARS4".cast("Int"), $"A00100".cast("Int"))
+irsLess.show
+irsLess.withColumn("agi_check", $"A00100".cast("Int") === $"A00100")
+irsLess.withColumn("agi_check", $"A00100".cast("Int") === $"A00100").show
+irsLess.withColumn("agi_check", $"A00100".cast("Int") === $"A00100").select("agi_check").distinct.show
+irsLess.withColumn("agi_check", $"A00100".cast("Int") === $"A00100").filter($"agi_check" === null).show
+irsLess.withColumn("agi_check", $"A00100".cast("Int") === $"A00100").filter($"agi_check" =!= true).show
+irsLess.withColumn("agi_check", $"A00100".cast("Int") === $"A00100").filter($"A00100".cast("Int") === null).show
+irsLess.withColumn("agi_check", $"A00100".cast("Int") === $"A00100").count
+irsLess.withColumn("agi_check", $"A00100".cast("Int") === $"A00100").na.drop.count
+val irsLess = irsRaw.select($"STATEFIPS".cast("Int"), $"STATE", $"COUNTYFIPS".cast("Int"), $"COUNTYNAME", $"agi_stub".cast("Int"), $"N1".cast("Int"), $"mars1".cast("Int"), $"MARS2".cast("Int"), $"MARS4".cast("Int"), $"A00100".cast("Int")).na.drop
+irsLess.show
+val irsLess = irsRaw.select($"STATEFIPS".cast("Int"), $"STATE", $"COUNTYFIPS".cast("Int"), $"COUNTYNAME", $"agi_stub".cast("Int"), $"N1".cast("Int"), $"mars1".cast("Int"), $"MARS2".cast("Int"), $"MARS4".cast("Int"), $"A00100".cast("Int")).na.drop.withColumn("filename", input_file_name)
+irsLess.show
+irsLess.show(false)
+val irsLess = irsRaw.select($"STATEFIPS".cast("Int"), $"STATE", $"COUNTYFIPS".cast("Int"), $"COUNTYNAME", $"agi_stub".cast("Int"), $"N1".cast("Int"), $"mars1".cast("Int"), $"MARS2".cast("Int"), $"MARS4".cast("Int"), $"A00100".cast("Int")).na.drop.withColumn("year", input_file_name)
+irsLess.show
+irsLess.show(false)
+def extractYear = udf((filename: String) => "20" + filename.split("/").last.substring(0,2))
+val irsLess = irsRaw.select($"STATEFIPS".cast("Int"), $"STATE", $"COUNTYFIPS".cast("Int"), $"COUNTYNAME", $"agi_stub".cast("Int"), $"N1".cast("Int"), $"mars1".cast("Int"), $"MARS2".cast("Int"), $"MARS4".cast("Int"), $"A00100".cast("Int")).na.drop.withColumn("year", extractYear(input_file_name))
+irsLess.show
+irsLess.select("year").orderBy("year").distinct.show
+val irsNoTotals = irsLess.filter($"COUNTYFIPS" =!= 0)
+irsNoTotals.show
+irsNoTotals.select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME").orderBy("STATEFIPS", "COUNTYFIPS")
+irsNoTotals.select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME").orderBy("STATEFIPS", "COUNTYFIPS").distinct.show
+irsNoTotals.select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME").orderBy("STATEFIPS", "COUNTYFIPS").distinct.count
+irsNoTotals.select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME").orderBy("STATEFIPS", "COUNTYFIPS").distinct.filter($"STATEFIPS" > 56).count
+irsNoTotals.select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME").orderBy("STATEFIPS", "COUNTYFIPS").distinct.filter($"STATEFIPS" <= 56).count
+irsNoTotals.withColumn("county_id", $"STATEFIPS")
+def makeCountyID = udf((statefips:Int, countyfips:Int) => f"$statefips%02d$countyfips%03d")
+irsNoTotals.withColumn("county_id", makeCountyID($"STATEFIPS", $"COUNTYFIPS"))
+irsNoTotals.withColumn("county_id", makeCountyID($"STATEFIPS", $"COUNTYFIPS")).show
+irsNoTotals.withColumn("county_id", makeCountyID($"STATEFIPS", $"COUNTYFIPS")).filter($"county_id" === "13297").show
+val irsWithCombinedID = irsNoTotals.withColumn("county_id", makeCountyID($"STATEFIPS", $"COUNTYFIPS"))
+val irsGrouped = irsWithCombinedID.groupBy("county_id")
+val irsGrouped = irsWithCombinedID.groupBy("county_id")
+val irsGrouped = irsWithCombinedID.rdd
+val irsGrouped = irsWithCombinedID.rdd.first
+irsWithCombinedID.schema
+val schema = irsWithCombinedID.schema

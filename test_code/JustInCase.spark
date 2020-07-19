@@ -1,0 +1,188 @@
+import org.apache.spark.ml.regression.GeneralizedLinearRegression
+val comb = spark.read.parquet("SHARE/DF/comb_avg_agi.parquet")
+comb.show
+:load MakeLabeledPoint.scala
+val data = comb.map(r => MakeLabeledPoint(r))
+data.show
+:load Cleaner.spark
+data.first
+data.first.features
+println(data.first.features)
+data.rdd.take(5)(4
+)
+println(data.rdd.take(5)(4)
+)
+data.rdd.take(5)(4).features.toArray.foreach(println)
+data
+comb("year")
+comb
+comb.show
+:load MakeLabeledPoint.scala
+comb.map(r => MakeLabeledPoint(r))
+res19.show
+comb.join(res19, $"county_id" === $"_1")
+comb.join(res19, $"county_id" === $"_1").show
+comb.join(res19, $"county_id" === $"_1").drop("_1").withColumnRenamed("_2", "features")
+comb.join(res19, $"county_id" === $"_1").drop("_1").withColumnRenamed("_2", "features").show
+val data = res23
+data.show
+import org.apache.spark.sql.functions.rand
+val train_df = data.filter($"year" =!= "2017")
+train_df.show
+train_df.filter($"year" === "2017")
+train_df.filter($"year" === "2017").count
+val test_df = data.filter($"year" === "2017")
+val data = comb.map(r => MakeLabeledPoint(r))
+data.show
+data
+:load MakeLabeledPoint.scala
+comb.show
+:load MakeLabeledPoint.scala
+:load MakeLabeledPoint.scala
+:load MakeLabeledPoint.scala
+val data = comb.map(r => MakeLabeledPoint(r))
+data.show
+val train_df = comb.filter($"year" =!= "2017").map(r => MakeLabeledPoint(r))
+val test_df = comb.filter($"year" === "2017").map(r => MakeLabeledPoint(r))
+:load MakeLabeledPoint.scala
+val train_df = comb.filter($"year" =!= "2017").map(r => MakeLabeledPoint(r))
+val test_df = comb.filter($"year" === "2017").map(r => MakeLabeledPoint(r))
+import org.apache.spark.ml.regression.LinearRegression
+val lr = new LinearRegression().setMaxIter(100).setRegParam(0.3).setElasticNetParam(0.8)
+val lr_model = lr.fit(train_df)
+lr_model.summary.rootMeanSquaredError
+lr_model.summary.r2
+import org.apache.spark.ml.classification.LinearSVC
+val lsvc = new LinearSVC().setMaxIter(100).setRegParam(0.3)
+val lr_pred = lr_model.transform(test_df)
+lr_pred.show
+val test1 = lr_pred.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3)
+test1.show
+val res_90 = test1.filter(_.getBoolean(4))
+val res_90 = test1.filter(_.getBoolean(4)).count
+val acc_90 = res_90.toDouble/test1.count
+val res_70 = test1.filter(_.getBoolean(6)).count
+val acc_70 = res_70.toDouble/test1.count
+lr_model.weightCol
+lr_model.coefficients
+22*.7
+22*1.3
+test1.describe()
+test1.describe().show
+lr_pred
+lr_pred.show
+lr_model.coefficients
+test1.show
+comb.count
+acc_90
+acc_70
+lr_model.summary.rootMeanSquaredError
+lr_pred.describe()
+lr_pred.describe().show
+:load ModelTrainer.scala
+:load MakeLabeledPoint.scala
+comb.show
+:load ModelTrainer.scala
+:load ModelTrainer.scala
+comb.map(r => MakeLabeledPoint(r))
+comb.map(r => MakeLabeledPoint(r)).show
+comb.map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", $"_2")
+comb.map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", $"_2").show
+comb.map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", col("_2"))
+comb.map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", col("_2").getField("label"))
+comb.map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", col("_2").getField("label")).show
+comb.map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", $"_2".getField("label")).withColumn("features", $"_2".getField("features"))
+comb.map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", $"_2".getField("label")).withColumn("features", $"_2".getField("features")).show
+comb.map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", $"_2".getField("label")).withColumn("features", $"_2".getField("features")).drop("_2")
+comb.map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", $"_2".getField("label")).withColumn("features", $"_2".getField("features")).drop("_2").show
+val table = comb
+val trainDF = table.filter($"year" =!= "2017").map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", $"_2".getField("label")).withColumn("features", $"_2".getField("features")).drop("_2")
+trainDF.show
+val testDF = table.filter($"year" === "2017").map(r => MakeLabeledPoint(r)).withColumnRenamed("_1", "county_id").withColumn("label", $"_2".getField("label")).withColumn("features", $"_2".getField("features")).drop("_2")
+trainDF.count
+testDF.count
+trainDF.count / (trainDF.count + testDF.count)
+res72.toDouble / (res72.toDouble + res73.toDouble)
+6/7
+6.0/7
+import org.apache.spark.ml.regression.LinearRegression
+val lr = new LinearRegression().setMaxIter(100).setRegParam(0.3).setElasticNetParam(0.8)
+val lrModel = lr.fit(trainDF)
+lrModel.coefficients
+lrModel.coefficients.toArray
+spark.sparkContext.parallelize(lrModel.coefficients.toArray)
+spark.sparkContext.parallelize(lrModel.coefficients.toArray).toDF
+spark.sparkContext.parallelize(lrModel.coefficients.toArray).toDF.show
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zipWithIndex).toDF.show
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zipWithIndex).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "index")
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zipWithIndex).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "index").show
+listOfNAICS
+listOfNAICS.toArray.slice(1,listOfNAICS.size)
+listOfNAICS.toArray.slice(1,listOfNAICS.size).map(_.replaceAll("-", ""))
+val NAICSCodes = res92
+val aggregate = Array()
+var agg = Array()
+var agg = Array[Any]()
+agg ++ Array(1)
+var agg = Array[String]()
+var agg = Array[String]("% Male", "% Female", "% Hispanic", "% White", "% Black", "% Native", "% Other")
+val BusinessSizes = Array[String]("<5", "5-9", "10-19", "20-49", "50-99", "100-249", "250-499", "500-999", "1,000-1,499", "1,500-2,499", "2,500-4,999", "5,000+")
+agg
+NAICSCodes.foreach(code => BusinessSizes.foreach(size => agg ++ Array[String](code + ":" + size)))
+agg
+NAICSCodes.foreach(code => BusinessSizes.foreach(size => agg = agg ++ Array[String](code + ":" + size)))
+agg
+agg.length
+trainDF
+trainDF.show
+trainDF.printSchema
+MakeLabeledPoint(table.first)
+MakeLabeledPoint(table.first)._2.features.size
+agg.length
+val coefTags = agg
+lrModel.coefficients
+lrModel.coefficients.toArray.zip(coefTags)
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.show
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature")
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").show
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").describe().show
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature")
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").printSchema
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").filter($"coeffecients" === 0).show
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").filter($"coeffecients" =!= 0).show
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").filter($"coeffecients" =!= 0).show(100)
+val NAICSCodes = Array("11_Agriculture", "21_Mining", "22_Utilities", "23_Construction", "31_Manufacturing", "42_Wholesale", "44_Retail", "48_Transportation", "51_Information", "52_Finance", "53_Real_Estate", "54_Professional", "55_Management", "56_Administrative", "61_Educational", "62_Health_Care", "71_Entertainment", "72_Accommodation_Food", "81_Other", "99_Unclassified")
+var agg = Array[String]("% Male", "% Female", "% Hispanic", "% White", "% Black", "% Native", "% Other")
+NAICSCodes.foreach(code => BusinessSizes.foreach(size => agg = agg ++ Array[String](code + ":" + size)))
+agg
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(coefTags)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").filter($"coeffecients" =!= 0).show(100)
+spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(agg)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").filter($"coeffecients" =!= 0).show(100)
+val coefTable = spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(agg)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").filter($"coeffecients" =!= 0)
+coefTable.show
+val coefTable = spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(agg)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature").filter($"coeffecients" =!= 0)
+coefTable.show
+val coefTable = spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(agg)).toDF.withColumnRenamed("_1", "coeffecients").withColumnRenamed("_2", "feature")
+coefTable
+coefTable.show
+coefTable.show(100)
+coefTable.filter($"coeffecients" =!= 0).show(100)
+coefTable.show(100)
+coefTable.filter($"coeffecients" =!= 0).show(100)
+val coefTable = spark.sparkContext.parallelize(lrModel.coefficients.toArray.zip(agg)).toDF.withColumnRenamed("_1", "coefficients").withColumnRenamed("_2", "feature")
+coefTable.show(20)
+coefTable.write.parquet("SHARE/OUTPUT/coefficients_table.parquet")
+val t = spark.read.parquet("SHARE/OUTPUT/coefficients_table.parquet")
+t.show
+val lrPred = lrModel.transform(testDF)
+lrPred.show
+val lrPred = lrModel.transform(testDF).withColumn("goodness", $"prediction" / $"label")
+lrPred.show
+lrPred.printSchema
+coefTable.printSchema
+lrPred.write.parquet("SHARE/OUTPUT/predictions_2017.parquet")
+lrPred.show
+lrPred.filter($"county_id" === "34003")
+lrPred.filter($"county_id" === "34003").show
+lrPred.filter($"county_id" === "36037").show
+lrPred.filter($"county_id" === "36055").show
