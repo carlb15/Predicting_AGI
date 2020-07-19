@@ -1,0 +1,11 @@
+:load Cleaner.spark
+cleaned_data.cache
+allyears.count
+cleaned_data.count
+"The reason why so many lines were filtered in cleaning is because the dataset dives into very detailed subcategories. We are only interested in the first level, which is represented by clean_data"
+val cols = List("fipstate", "fipscty", "est", "n1_4", "n5_9", "n10_19", "n20_49", "n50_99", "n100_249", "n250_499", "n500_999", "n1000_1", "n1000_2", "n1000_3", "n1000_4", "year")
+cols.foreach(s=> {
+println(s + " count: " + cleaned_data.select(s).distinct.count)
+cleaned_data.agg(min(s), max(s), avg(s)).show
+})
+cleaned_data.select("naics").distinct.count

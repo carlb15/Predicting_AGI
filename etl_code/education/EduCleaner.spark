@@ -1,0 +1,185 @@
+import org.apache.spark.sql.Row
+
+val eduRaw11 = spark.read.option("header", "true").csv("SHARE/EDU/ACSST5Y2011.csv")
+val eduLess11 = eduRaw11.select(eduRaw11.columns.filter(!_.contains("Margin")).map(eduRaw11(_)) : _*)
+val s = Map(0->"id",
+		2->"Total!!Estimate!!Population 18 to 24 years",
+		3->"Total!!Estimate!!Less than high school graduate",
+		4->"Total!!Estimate!!High school graduate (includes equivalency)6",
+		5->"Total!!Estimate!!Some college or associate's degree",
+		6->"Total!!Estimate!!Bachelor's degree or higher10",
+		7->"Total!!Estimate!!Population 25 years and over",
+		8->"Total!!Estimate!!Less than 9th grade",
+		9->"Total!!Estimate!!9th to 12th grade, no diploma",
+		10->"Total!!Estimate!!High school graduate (includes equivalency)18",
+		11->"Total!!Estimate!!Some college, no degree",
+		12->"Total!!Estimate!!Associate's degree",
+		13->"Total!!Estimate!!Bachelor's degree",
+		14->"Total!!Estimate!!Graduate or professional degree")
+		
+def eduParse(r:Row, m:Map[Int, String]) = { 
+	val fips_combined = r.getString(r.fieldIndex(m(0))).substring(9)
+	val pop_18_24 = r.getString(r.fieldIndex(m(2))).toInt
+	val pop_25_plus = r.getString(r.fieldIndex(m(7))).toInt
+	val lhs1 = try { r.getString(r.fieldIndex(m(3))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val hs1 = try { r.getString(r.fieldIndex(m(4))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val sc1 = try { r.getString(r.fieldIndex(m(5))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val bs1 = try { r.getString(r.fieldIndex(m(6))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val lhs2_1 = try { r.getString(r.fieldIndex(m(8))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val lhs2_2 = try { r.getString(r.fieldIndex(m(9))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val hs2 = try { r.getString(r.fieldIndex(m(10))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val sc2_1 = try { r.getString(r.fieldIndex(m(11))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val sc2_2 = try { r.getString(r.fieldIndex(m(12))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val bs2_1 = try { r.getString(r.fieldIndex(m(13))).toDouble } catch { case e: NumberFormatException => 0.0 }
+	val bs2_2 = try { r.getString(r.fieldIndex(m(14))).toDouble } catch { case e: NumberFormatException => 0.0 }
+
+	val less_than_hs = (lhs1 * pop_18_24) + ((lhs2_1 + lhs2_2) * pop_25_plus)
+	val only_hs = (hs1 * pop_18_24) + (hs2 * pop_25_plus)
+	val some_college = (sc1 * pop_18_24) + ((sc2_1 + sc2_2) * pop_25_plus)
+	val bachelors_or_higher = (bs1 * pop_18_24) + ((bs2_1 + bs2_2) * pop_25_plus)
+
+	(fips_combined, 
+		Math.round(less_than_hs/100.0), 
+		Math.round(only_hs/100.0), 
+		Math.round(some_college/100.0), 
+		Math.round(bachelors_or_higher/100.0)
+	)
+}
+val eduParsed11 = eduLess11.map(eduParse(_, s)).select(
+	$"_1".cast("Int").as("fips_combined"),
+	$"_2".cast("Int").as("less_than_highschool"),
+	$"_3".cast("Int").as("highschool"),
+	$"_4".cast("Int").as("some_college"),
+	$"_5".cast("Int").as("bachelors")).withColumn("year", lit(2011))
+
+val eduRaw12 = spark.read.option("header", "true").csv("SHARE/EDU/ACSST5Y2012.csv")
+val eduLess12 = eduRaw12.select(eduRaw12.columns.filter(!_.contains("Margin")).map(eduRaw12(_)) : _*)
+
+val eduParsed12 = eduLess12.map(eduParse(_, s)).select(
+        $"_1".cast("Int").as("fips_combined"),
+        $"_2".cast("Int").as("less_than_highschool"),
+        $"_3".cast("Int").as("highschool"),
+        $"_4".cast("Int").as("some_college"),
+        $"_5".cast("Int").as("bachelors")).withColumn("year", lit(2012))
+
+val eduRaw13 = spark.read.option("header", "true").csv("SHARE/EDU/ACSST5Y2013.csv")
+val eduLess13 = eduRaw13.select(eduRaw13.columns.filter(!_.contains("Margin")).map(eduRaw13(_)) : _*)
+
+val s = Map(0->"id",
+                2->"Total!!Estimate!!Population 18 to 24 years",
+                3->"Total!!Estimate!!Less than high school graduate",
+                4->"Total!!Estimate!!High school graduate (includes equivalency)",
+                5->"Total!!Estimate!!Some college or associate's degree",
+                6->"Total!!Estimate!!Bachelor's degree or higher",
+                7->"Total!!Estimate!!Population 25 years and over",
+                8->"Total!!Estimate!!Population 25 years and over!!Less than 9th grade",
+                9->"Total!!Estimate!!Population 25 years and over!!9th to 12th grade, no diploma",
+                10->"Total!!Estimate!!Population 25 years and over!!High school graduate (includes equivalency)",
+                11->"Total!!Estimate!!Population 25 years and over!!Some college, no degree",
+                12->"Total!!Estimate!!Population 25 years and over!!Associate's degree",
+                13->"Total!!Estimate!!Population 25 years and over!!Bachelor's degree",
+                14->"Total!!Estimate!!Population 25 years and over!!Graduate or professional degree")
+
+val eduParsed13 = eduLess13.map(eduParse(_, s)).select(
+        $"_1".cast("Int").as("fips_combined"),
+        $"_2".cast("Int").as("less_than_highschool"),
+        $"_3".cast("Int").as("highschool"),
+        $"_4".cast("Int").as("some_college"),
+        $"_5".cast("Int").as("bachelors")).withColumn("year", lit(2013))
+
+val eduRaw14 = spark.read.option("header", "true").csv("SHARE/EDU/ACSST5Y2014.csv")
+val eduLess14 = eduRaw14.select(eduRaw14.columns.filter(!_.contains("Margin")).map(eduRaw14(_)) : _*)
+
+val eduParsed14 = eduLess14.map(eduParse(_, s)).select(
+        $"_1".cast("Int").as("fips_combined"),
+        $"_2".cast("Int").as("less_than_highschool"),
+        $"_3".cast("Int").as("highschool"),
+        $"_4".cast("Int").as("some_college"),
+        $"_5".cast("Int").as("bachelors")).withColumn("year", lit(2014))
+
+val eduRaw15 = spark.read.option("header", "true").csv("SHARE/EDU/ACSST5Y2015.csv")
+val eduLess15 = eduRaw15.select(eduRaw15.columns.filter(!_.contains("Margin")).map(eduRaw15(_)) : _*)
+
+val s = Map(0->"id",
+                2->"Total!!Estimate!!Population 18 to 24 years",
+                3->"Total!!Estimate!!Population 18 to 24 years!!Less than high school graduate",
+                4->"Total!!Estimate!!Population 18 to 24 years!!High school graduate (includes equivalency)",
+                5->"Total!!Estimate!!Population 18 to 24 years!!Some college or associate's degree",
+                6->"Total!!Estimate!!Population 18 to 24 years!!Bachelor's degree or higher",
+                7->"Total!!Estimate!!Population 25 years and over",
+                8->"Total!!Estimate!!Population 25 years and over!!Less than 9th grade",
+                9->"Total!!Estimate!!Population 25 years and over!!9th to 12th grade, no diploma",
+                10->"Total!!Estimate!!Population 25 years and over!!High school graduate (includes equivalency)",
+                11->"Total!!Estimate!!Population 25 years and over!!Some college, no degree",
+                12->"Total!!Estimate!!Population 25 years and over!!Associate's degree",
+                13->"Total!!Estimate!!Population 25 years and over!!Bachelor's degree",
+                14->"Total!!Estimate!!Population 25 years and over!!Graduate or professional degree")
+
+def eduParse(r:Row, m:Map[Int, String]) = {
+        val fips_combined = r.getString(r.fieldIndex(m(0))).substring(9)
+        val lhs1 = try { r.getString(r.fieldIndex(m(3))).toInt } catch { case e: NumberFormatException => 0 }
+        val hs1 = try { r.getString(r.fieldIndex(m(4))).toInt } catch { case e: NumberFormatException => 0 }
+        val sc1 = try { r.getString(r.fieldIndex(m(5))).toInt } catch { case e: NumberFormatException => 0 }
+        val bs1 = try { r.getString(r.fieldIndex(m(6))).toInt } catch { case e: NumberFormatException => 0 }
+        val lhs2_1 = try { r.getString(r.fieldIndex(m(8))).toInt } catch { case e: NumberFormatException => 0 }
+        val lhs2_2 = try { r.getString(r.fieldIndex(m(9))).toInt } catch { case e: NumberFormatException => 0 }
+        val hs2 = try { r.getString(r.fieldIndex(m(10))).toInt } catch { case e: NumberFormatException => 0 }
+        val sc2_1 = try { r.getString(r.fieldIndex(m(11))).toInt } catch { case e: NumberFormatException => 0 }
+        val sc2_2 = try { r.getString(r.fieldIndex(m(12))).toInt } catch { case e: NumberFormatException => 0 }
+        val bs2_1 = try { r.getString(r.fieldIndex(m(13))).toInt } catch { case e: NumberFormatException => 0 }
+        val bs2_2 = try { r.getString(r.fieldIndex(m(14))).toInt } catch { case e: NumberFormatException => 0 }
+
+        val less_than_hs = lhs1 + lhs2_1 + lhs2_2
+        val only_hs = hs1 + hs2
+        val some_college = sc1 + sc2_1 + sc2_2
+        val bachelors_or_higher = bs1 + bs2_1 + bs2_2
+
+        (fips_combined, less_than_hs, only_hs, some_college, bachelors_or_higher)
+}
+
+val eduParsed15 = eduLess15.map(eduParse(_, s)).select(
+        $"_1".cast("Int").as("fips_combined"),
+        $"_2".cast("Int").as("less_than_highschool"),
+        $"_3".cast("Int").as("highschool"),
+        $"_4".cast("Int").as("some_college"),
+        $"_5".cast("Int").as("bachelors")).withColumn("year", lit(2015))
+
+val eduRaw16 = spark.read.option("header", "true").csv("SHARE/EDU/ACSST5Y2016.csv")
+val eduLess16 = eduRaw16.select(eduRaw16.columns.filter(!_.contains("Margin")).map(eduRaw16(_)) : _*)
+
+val eduParsed16 = eduLess16.map(eduParse(_, s)).select(
+        $"_1".cast("Int").as("fips_combined"),
+        $"_2".cast("Int").as("less_than_highschool"),
+        $"_3".cast("Int").as("highschool"),
+        $"_4".cast("Int").as("some_college"),
+        $"_5".cast("Int").as("bachelors")).withColumn("year", lit(2016))
+
+val eduRaw17 = spark.read.option("header", "true").csv("SHARE/EDU/ACSST5Y2017.csv")
+val eduLess17 = eduRaw17.select(eduRaw17.columns.filter(!_.contains("Margin")).map(eduRaw17(_)) : _*)
+
+val s = Map(0->"id",
+                2->"Estimate!!Total!!Population 18 to 24 years",
+                3->"Estimate!!Total!!Population 18 to 24 years!!Less than high school graduate",
+                4->"Estimate!!Total!!Population 18 to 24 years!!High school graduate (includes equivalency)",
+                5->"Estimate!!Total!!Population 18 to 24 years!!Some college or associate's degree",
+                6->"Estimate!!Total!!Population 18 to 24 years!!Bachelor's degree or higher",
+                7->"Estimate!!Total!!Population 25 years and over",
+                8->"Estimate!!Total!!Population 25 years and over!!Less than 9th grade",
+                9->"Estimate!!Total!!Population 25 years and over!!9th to 12th grade, no diploma",
+                10->"Estimate!!Total!!Population 25 years and over!!High school graduate (includes equivalency)",
+                11->"Estimate!!Total!!Population 25 years and over!!Some college, no degree",
+                12->"Estimate!!Total!!Population 25 years and over!!Associate's degree",
+                13->"Estimate!!Total!!Population 25 years and over!!Bachelor's degree",
+                14->"Estimate!!Total!!Population 25 years and over!!Graduate or professional degree")
+
+val eduParsed17 = eduLess17.map(eduParse(_, s)).select(
+        $"_1".cast("Int").as("fips_combined"),
+        $"_2".cast("Int").as("less_than_highschool"),
+        $"_3".cast("Int").as("highschool"),
+        $"_4".cast("Int").as("some_college"),
+        $"_5".cast("Int").as("bachelors")).withColumn("year", lit(2017))
+
+val toAdd = Array(eduParsed12, eduParsed13, eduParsed14, eduParsed15, eduParsed16, eduParsed17)
+var eduParsedTotal = eduParsed11
+for (edu <- toAdd) { eduParsedTotal = eduParsedTotal.union(edu) }
+eduParsedTotal.cache

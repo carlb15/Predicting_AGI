@@ -1,0 +1,23 @@
+val irsRaw11 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/11incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw12 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/12cyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw13 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/13incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw14 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/14incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw15 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/15incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw16 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/16incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val irsRaw17 = spark.read.option("header", "true").csv("SHARE/IRS/RAW/17incyallagi.csv").select("STATEFIPS", "STATE", "COUNTYFIPS", "COUNTYNAME", "agi_stub", "N1", "A00100")
+val toAdd = Array(irsRaw12, irsRaw13, irsRaw14, irsRaw15, irsRaw16, irsRaw17)
+var irsRaw = irsRaw11
+for (irs <- toAdd) { irsRaw = irsRaw.union(irs) }
+import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.functions.input_file_name
+def extractYear = udf((filename: String) => "20" + filename.split("/").last.substring(0,2))
+val irsLess = irsRaw.select($"STATEFIPS".cast("Int").as("fipstate"), $"STATE".as("state"), $"COUNTYFIPS".cast("Int").as("fipscty"), $"COUNTYNAME".as("county"), $"agi_stub".cast("Int"), $"N1".cast("Int").as("Number_of_returns"), $"A00100".cast("Int").as("agi")).na.drop.withColumn("year", extractYear(input_file_name))
+val irsNoTotals = irsLess.filter($"fipscty" =!= 0)
+def makeCountyID = udf((statefips:Int, countyfips:Int) => f"$statefips%02d$countyfips%03d")
+val irsWithCombinedID = irsNoTotals.withColumn("fips_combined", makeCountyID($"fipstate", $"fipscty"))
+val irsFinal = irsWithCombinedID.groupBy("fipstate", "state", "fipscty", "county", "fips_combined", "year").agg(sum("Number_of_returns").as("number_of_returns"), sum("agi").as("total_agi"))
+//:load IrsProfile.scala
+//import spark.implicits._
+//implicit val IrsProfileEncoder = org.apache.spark.sql.Encoders.kryo[IrsProfile]
+//val irsFinal = irsWithCombinedID.map(r => IrsProfileFactory(r)).groupByKey(ip => (ip.fipstate, ip.fipscty, ip.year)).reduceGroups(_.merge(_)).map(r => (r._2.fipstate, r._2.state, r._2.fipscty, r._2.county, r._2.county_id, r._2.n1, r._2.agi, r._2.year)).withColumnRenamed("_1", "fipstate").withColumnRenamed("_2", "state").withColumnRenamed("_3", "fipscty").withColumnRenamed("_4", "county").withColumnRenamed("_5", "fips_combined").withColumnRenamed("_6", "n1").withColumnRenamed("_7", "agi").withColumnRenamed("_8", "year")
+//irsFinal.cache

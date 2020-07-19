@@ -1,0 +1,49 @@
+:load Cleaner.spark
+cleaned_data.show(21)
+import java.io.PrintWriter
+import java.io.File
+cleaned_data.printSchema
+cleaned_data.show(21)
+val cleaned_data2 = cleaned_data.select(
+$"fipstate".cast("int"))
+cleaned_data2.show(21)
+cleaned_data.show(1)
+val cleaned_data2 = cleaned_data.select(
+$"fipstate".cast("int"),
+$"fipscty".cast("int"),
+$"naics",
+$"est".cast("int"),
+$"n1_4".cast("int"),
+$"n5_9".cast("int"),
+$"n10_19".cast("int"),
+$"n20_49".cast("int"),
+$"n50_99".cast("int"),
+$"n100_249".cast("int"),
+$"n250_499".cast("int"),
+$"n500_999".cast("int"),
+$"n1000_1".cast("int"),
+$"n1000_2".cast("int"),
+$"n1000_3".cast("int"),
+$"n1000_4".cast("int"),
+$"year")
+cleaned_data2.printSchema
+val cleaned_data2 = cleaned_data.select(
+$"fipstate".cast("int"),
+$"fipscty".cast("int"),
+$"naics",
+$"est".cast("int"),
+$"n1_4".cast("int"),
+$"n5_9".cast("int"),
+$"n10_19".cast("int"),
+$"n20_49".cast("int"),
+$"n50_99".cast("int"),
+
+$"n100_249".cast("int"),
+$"n250_499".cast("int"),
+$"n500_999".cast("int"),
+$"n1000_1".cast("int"),
+$"n1000_2".cast("int"),
+$"n1000_3".cast("int"),
+$"n1000_4".cast("int"),
+$"year".cast("int"))
+cleaned_data2.printSchema

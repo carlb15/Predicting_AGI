@@ -1,0 +1,17 @@
+:load MakeLabeledPoint.scala
+import org.apache.spark.ml._
+import org.apache.spark.ml.feature._
+import org.apache.spark.ml.linalg._
+import org.apache.spark.ml.regression._
+:load MakeLabeledPoint.scala
+val comb = spark.read.parquet("SHARE/DF/comb_avg_agi.parquet")
+comb.show
+val data = comb.map(r => MakeLabeledPoint(r))
+data.show
+val splits = data.randomSplit(Array(0.8, 0.2))
+val train_df = splits(0)
+val test_df = splits(1)
+val lr = new LinearRegression().setMaxIter(100).setRegParam(0.3).setElasticNetParam(0.8)
+val lr_model = lr.fit(train_df)
+lr_model.summary.rootMeanSquaredError
+lr_model.summary.r2

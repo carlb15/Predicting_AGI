@@ -1,0 +1,172 @@
+val comb = spark.read.parquet("SHARE/DF/comb_avg_agi.parquet")
+comb.show
+:load MakeLabeledPoint.scala
+val data = comb.map(r => MakeLabeledPoint(r))
+data.show
+val train_df = comb.filter(r => r.getString(0) != "2017")
+train_df.show
+val train_df = comb.filter(r => r.getString(0) != "2017").map(r => MakeLabeledPoint(r))
+train_df.show
+val test_df = comb.filter(r => r.getString(0) == "2017").map(r => MakeLabeledPoint(r))
+test_df.show
+train_df.count
+test_df.count
+import org.apache.spark.ml.regression.LinearRegression
+val lr = new LinearRegression().setMaxIter(100).setRegParam(0.3).setElasticNetParam(0.8)
+val lr_model = lr.fit(train_df)
+lr_model.intercept
+lr_model.summary.rootMeanSquaredError
+lr_model.summary.r2
+val lr_predictions = lr_model.transform(test_df)
+lr_predictions.select("prediction", "label", "features").show(20)
+val test1 = lr_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label"))
+val test1 = lr_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).show
+val test1 = lr_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_thresh_90", $"closeness" >= .9 && $"closeness" <= 1.1)
+test1.show
+val test1 = lr_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).show
+val test1 = lr_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2)
+test1.show
+val test1 = lr_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3)
+test1.show
+val res_90 = test1.select("within_90").filter(r => r.getBoolean(0))
+val res_90 = test1.select("within_90").filter(r => r.getBoolean(0)).count
+test1.count
+val acc_90 = res_90 / test1.count
+val acc_90 = res_90.toDouble / test1.count
+val res_80 = test1.select("within_80").filter(r => r.getBoolean(0)).count
+val acc_80 = res_80 / test1.count
+val acc_80 = res_80.toDouble / test1.count
+val res_70 = test1.select("within_70").filter(r => r.getBoolean(0)).count
+val acc_70 = res_70.toDouble / test1.count
+val test_result = lr_model.evaluate(test_df)
+test_result.rootMeanSquaredError
+test_result.r2
+val test_predictions = lr_model.transform(test_df)
+test_predictions.show
+val train_predictions = lr_model.transform(train_df)
+train_predictions.show
+val test2 = train_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3)
+test2.show
+val tacc_90 = test2.select("within_90").filter(_.getBoolean(0))
+test2.describe()
+test2.describe().show
+val test2 = train_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3).na.drop
+test2.count
+val test2 = train_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3)
+test2.count
+val test2 = train_predictions.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3).na.drop
+val tacc_90 = test2.select("within_90").filter(_.getBoolean(0)).count
+val tres_90 = test2.select("within_90").filter(_.getBoolean(0)).count
+val tacc_90 = tres_90 / test2.count
+val tacc_90 = tres_90.toDouble / test2.count
+val tres_80 = test2.select("within_80").filter(_.getBoolean(0)).count
+val tacc_80 = tres_80.toDouble / test2.count
+val tres_70 = test2.select("within_70").filter(_.getBoolean(0)).count
+val tacc_70 = tres_70.toDouble / test2.count
+acc_70
+acc_80
+acc_90
+import org.apache.spark.ml.regression.DecisionTreeRegressor
+val dt = new DecisionTreeRegressor()
+val dt_model = dt.fit(train_df)
+dt_model.featureImportances
+val dt_pred = dt_model.transform(test_df)
+dt_pred.show
+val test3 = dt_pred.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3).na.drop
+val test3 = dt_pred.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3)
+test3.count
+val test3 = dt_pred.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3).na.drop
+test3.count
+val dt_res_90 = test3.select("within_90").filter(_.getBoolean(0)).count
+test3.cache
+val dt_acc_90 = dt_res_90.toDouble / test3.count
+acc_90
+val dt_res_80 = test3.select("within_80").filter(_.getBoolean(0)).count
+val dt_acc_80 = dt_res_80.toDouble / test3.count
+acc_80
+val dt_res_70 = test3.select("within_70").filter(_.getBoolean(0)).count
+val dt_acc_70 = dt_res_70.toDouble / test3.count
+acc_70
+import org.apache.spark.ml.regression.{RandomForestRegressionModel, RandomForestRegressor}
+val rf = new RandomForestRegressor()
+val rf_model = rf.fit(train_df)
+rf_model.numFeatures
+rf_model.treeWeights
+rf_model.trees
+rf_model.write.save("SHARE/MODS/rf_model_7_13.model")
+lr_model.write.save("SHARE/MODS/lr_model_7_13.model")
+dt_model.write.save("SHARE/MODS/dt_model_7_13.model")
+val rf_pred = rf_model.transform(test_df)
+val test4 = rf_pred.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3).na.drop
+test4.count
+val test4 = rf_pred.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3)
+test4.count
+test4.show
+val rf_acc_90 = test4.filter(_.getBoolean(4)).count
+val rf_res_90 = test4.filter(_.getBoolean(4)).count
+val rf_acc_90 = rf_res_90.toDouble/test4.count
+acc_90
+dt_acc_90
+val rf_acc_90 = rf_res_90.toDouble/test4.count
+acc_90
+val rf_res_80 = test4.filter(_.getBoolean(4)).count
+val rf_acc_80 = rf_res_80.toDouble/test4.count
+val rf_res_80 = test4.filter(_.getBoolean(5)).count
+val rf_acc_80 = rf_res_80.toDouble/test4.count
+acc_80
+val rf_res_90 = test4.filter(_.getBoolean(6))
+val rf_res_90 = test4.filter(_.getBoolean(4)).count
+val rf_res_70 = test4.filter(_.getBoolean(4)).count
+val rf_res_70 = test4.filter(_.getBoolean(6)).count
+val rf_acc_70 = rf_res_70.toDouble/test4.count
+acc_70
+import org.apache.spark.ml.regression.{GBTRegressionModel, GBTRegressor}
+val gbt = new GBTRegressor().setMaxIter(100)
+val gbt_model = gbt.fit(train_df)
+gbt_model.featureImportances
+gbt_model.featureImportances(2)
+gbt_model.featureImportances
+gbt_model.featureImportances.size
+val gbt_impot = sc.parallelize(gbt_model.featureImportances.toArray)
+gbt_model.featureImportances.toArray
+gbt_impot.toDF.show
+gbt_model.featureImportances.toArray.zipWithIndex
+val gbt_impot = sc.parallelize(gbt_model.featureImportances.toArray.zipWithIndex)
+gbt_impot.toDF.show
+val gbt_impot = sc.parallelize(gbt_model.featureImportances.toArray.zipWithIndex).toDF.withColumnRenamed("_1", "importance").withColumnRenamed("_2", "id")
+gbt_impot.toDF.show
+gbt_impot.toDF.filter(_.getDouble(0) > .05)
+gbt_impot.toDF.filter(_.getDouble(0) > .05).count
+gbt_impot.toDF.filter(_.getDouble(0) > .01).count
+gbt_impot.toDF.filter(_.getDouble(0) == 0).count
+gbt_impot.toDF.filter(_.getDouble(0) > .01).show
+gbt_impot.toDF.filter(_.getDouble(0) > .01).show(false)
+gbt_impot.toDF.filter(_.getDouble(0) > .01).show(true)
+gbt_impot.toDF.filter(_.getDouble(0) > .01).show(100)
+gbt_model.write.save("SHARE/MODS/gbt_model_7_13.model")
+val test4 = rf_pred.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3)
+val gbt_pred = gbt_model.transform(test_df)
+gbt_pred
+gbt_pred.show
+val test5 = gbt_pred.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3)
+val gbt_res_90 = test5.filter(_.getBoolean(4)).count
+val gbt_acc_90 = gbt_res_90.toDouble / test5.count
+acc_90
+val gbt = new GBTRegressor().setMaxIter(10)
+val gbt_model = gbt.fit(train_df)
+val gbt_pred = gbt_model.transform(test_df)
+val test5 = gbt_pred.select("prediction", "label", "features").withColumn("closeness", ($"prediction" / $"label")).withColumn("within_90", $"closeness" >= .9 && $"closeness" <= 1.1).withColumn("within_80", $"closeness" >= .8 && $"closeness" <= 1.2).withColumn("within_70", $"closeness" >= .7 && $"closeness" <= 1.3)
+val gbt_res_90 = test5.filter(_.getBoolean(4)).count
+val gbt_acc_90 = gbt_res_90.toDouble / test5.count
+acc_90
+val gbt_res_80 = test5.filter(_.getBoolean(5)).count
+val gbt_acc_80 = gbt_res_80.toDouble / test5.count
+acc_80
+val gbt_res_70 = test5.filter(_.getBoolean(6)).count
+gbt_model.write.save("gbt_model_7_13.model")
+val gbt_acc_70 = gbt_res_70.toDouble / test5.count
+acc_70
+acc_90
+dt_acc_90
+rf_acc_90
+gbt_acc_90
