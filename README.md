@@ -64,6 +64,7 @@
 ├── profiling_code
 │   ├── business
 │   │   └── Profiling.scalaspark
+	Note: Change directory specified if data resides at a different path
 │   ├── irs
 │   │   ├── Profiling.scalaspark
 │   │   └── profiler_explain.txt
