@@ -11,12 +11,17 @@
 │   │   └── main
 │   │       └── scala
 │   │           └── ModelTrainer.scala
-    Build:
-    Run:
-    Description:
-    Input Dir:
-    Output Dir:
-
+    Build: sbt package
+    Run: ./driver.sh
+    Description: driver.sh is a bash file that upon execution will query the user for several inputs,
+		then will sumbit a Spark job with correct parameters. It is assumed to be running on
+		NYU DUMBO cluster.
+    Input Dir: hdfs://user/mlu216/SHARE/DF/combinedAvgAgiAndEdu.parquet
+    Output Dir: hdfs://user/mlu216/SHARE/OUTPUT/${Month job is submitted}/${Day job is submitted}/
+		Job will output 4 files named with the time job was submitted, one .model file and 3
+		.parquet files.
+    Notes: Additional files (.class, etc.) are included with build as proof of originality of code.
+	   See screenshots for an example runtime.
 │   ├── tableau
 │   │   ├── file_convert_for_tableau
 │   │   └── read_outputs.scala
