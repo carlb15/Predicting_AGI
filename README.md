@@ -60,6 +60,7 @@
 	Notes: Change directory specified for each dataset as needed
 │   └── us_census
 │       └── Cleaner.scalaspark
+	Notes: Change directory specified for each dataset as needed
 ├── out.txt
 ├── profiling_code
 │   ├── business
@@ -68,8 +69,10 @@
 │   ├── irs
 │   │   ├── Profiling.scalaspark
 │   │   └── profiler_explain.txt
+	Note: Change directory specified for each dataset as needed
 │   └── us_census
 │       └── Profiling.scalaspark
+	Note: Change directory specified for each dataset as needed
 ├── screenshots
 │   ├── exampleRuntime1.jpg
 │   ├── exampleRuntime2.pdf
