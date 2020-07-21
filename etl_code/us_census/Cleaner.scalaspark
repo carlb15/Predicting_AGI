@@ -23,7 +23,7 @@ for (file <- files)
                                 "DP05_0001E",
                                 "DP05_0002E",
                                 "DP05_0003E",
-                                "DP05_0071PE",   // TODO:  DP05_0071PE for 2017 and 2018
+                                "DP05_0071PE",   // DP05_0071PE for 2017 and 2018
                                 "DP05_0077PE",   // DP05_0077PE
                                 "DP05_0078PE",   // DP05_0078PE
                                 "DP05_0079PE")   // DP05_0079PE
@@ -36,7 +36,7 @@ for (file <- files)
                                 "DP05_0001E",
                                 "DP05_0002E",
                                 "DP05_0003E",
-                                "DP05_0070PE",   // TODO:  DP05_0071PE for 2017 and 2018
+                                "DP05_0070PE",   // DP05_0071PE for 2017 and 2018
                                 "DP05_0072PE",   // DP05_0077PE
                                 "DP05_0073PE",   // DP05_0078PE
                                 "DP05_0074PE")   // DP05_0079PE
@@ -56,7 +56,7 @@ for (file <- files)
                                 "DP05_0001E",
                                 "DP05_0002E",
                                 "DP05_0003E",
-                                "DP05_0071PE",   // TODO:  DP05_0071PE for 2017 and 2018
+                                "DP05_0071PE",   // DP05_0071PE for 2017 and 2018
                                 "DP05_0077PE",   // DP05_0077PE
                                 "DP05_0078PE",   // DP05_0078PE
                                 "DP05_0079PE")   // DP05_0079PE
@@ -70,7 +70,7 @@ for (file <- files)
                                 "DP05_0001E",
                                 "DP05_0002E",
                                 "DP05_0003E",
-                                "DP05_0070PE",   // TODO:  DP05_0071PE for 2017 and 2018
+                                "DP05_0070PE",   // DP05_0071PE for 2017 and 2018
                                 "DP05_0072PE",   // DP05_0077PE
                                 "DP05_0073PE",   // DP05_0078PE
                                 "DP05_0074PE")   // DP05_0079PE
@@ -113,8 +113,8 @@ for (file <- files)
                       withColumn("white",            col("white").cast(DoubleType)).
                       withColumn("black",            col("black").cast(DoubleType)).
                       withColumn("native",           col("native").cast(DoubleType))
-    
+
     val dir = "bdad_proj/clean/"
-    
+
     df2.write.parquet(dir + file.toString + ".parquet")
 }
