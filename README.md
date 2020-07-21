@@ -46,13 +46,18 @@
 │   ├── business
 │   │   ├── BusinessProfile.scala
 │   │   └── CbpCleaner.spark
+	Notes: Run using spark2-shell -i CbpCleaner.spark, with BusinessProfile.scala in same folder
+		Change directory specified in .spark code to load data at different path
 │   ├── education
 │   │   └── EduCleaner.spark
+	Notes: Run using spark2-shell -i EduCleaner.spark
+		Change directory specified in .spark code to load data at different path
 │   ├── irs
 │   │   ├── Cleaner.scalaspark
 │   │   ├── IrsCleaner.spark
 │   │   └── cleaner_explain.txt
 │   ├── joinScript.spark
+	Notes: Change directory specified for each dataset as needed
 │   └── us_census
 │       └── Cleaner.scalaspark
 ├── out.txt
