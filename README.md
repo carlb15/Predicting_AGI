@@ -1,6 +1,6 @@
-# Predicting Annual Gross Income (AGI)
+# Predicting Average Adjusted Gross Income (AGI)
 
-## Goal: Develop linear regression model (Spark ML) on NYU DUMBO to Predict Annual Gross Income (AGI)
+## Goal: Develop linear regression model (Spark ML) on NYU DUMBO to Predict Average Adjusted Gross Income (AGI)
 
 ### Input
 
