@@ -1,6 +1,6 @@
-# BDAD_proj
+# Predicting Annual Gross Income (AGI)
 
-## Goal: develop linear regression model (Spark ML) on NYU DUMBO
+## Goal: Develop linear regression model (Spark ML) on NYU DUMBO to Predict Annual Gross Income (AGI)
 
 ### Input
 
